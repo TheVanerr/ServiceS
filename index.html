@@ -1,218 +1,99 @@
-﻿<!doctype html>
+﻿<!DOCTYPE html>
 <html lang="tr" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Servis Hata Kodları Rehberi</title>
+  <title>Servis Ariza Rehberi</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Space Grotesk', sans-serif; }
-    
-    .sidebar-transition {
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .content-transition {
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .category-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-    }
-    
-    .category-content.open {
-      max-height: 1000px;
-    }
-    
-    .error-item:hover {
-      transform: translateX(4px);
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .cause-card {
-      transition: all 0.2s ease;
-    }
-    
-    .cause-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.2);
-    }
+    * { font-family: 'Space Grotesk', sans-serif; box-sizing: border-box; }
+    #sidebar { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+    #main-content { transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
+    .fault-body { max-height:0; overflow:hidden; transition: max-height 0.4s ease; }
+    .fault-body.open { max-height: 9999px; }
+    .cause-solution { max-height:0; overflow:hidden; transition: max-height 0.3s ease; }
+    .cause-solution.open { max-height: 3000px; }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .machine-btn.active { background:rgba(251,191,36,0.18); border-color:rgba(251,191,36,0.55); color:#fbbf24; }
+    .fault-header { cursor:pointer; transition: background 0.15s; }
+    .fault-header:hover { background: rgba(255,255,255,0.04); }
+    .cause-row { cursor:pointer; transition: background 0.15s; }
+    .cause-row:hover { background: rgba(255,255,255,0.05); }
+    .fault-arrow, .cause-arrow { transition: transform 0.25s; flex-shrink:0; }
+    .fault-arrow.open, .cause-arrow.open { transform: rotate(180deg); }
+    ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}
   </style>
-  <style>body { box-sizing: border-box; }</style>
- </head>
- <body class="h-full bg-slate-900 text-slate-100 overflow-hidden">
-  <div class="flex h-full w-full"><!-- Sidebar -->
-   <aside id="sidebar" class="sidebar-transition fixed left-0 top-0 h-full w-72 bg-slate-800 border-r border-slate-700 z-40 overflow-y-auto">
-    <div class="p-4 border-b border-slate-700 flex items-center justify-between">
-     <h1 id="site-title" class="text-lg font-bold text-amber-400">🔧 Servis Rehberi</h1><button id="close-sidebar" class="p-2 hover:bg-slate-700 rounded-lg transition-colors lg:hidden">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-      </svg></button>
+</head>
+<body class="h-full bg-slate-900 text-slate-100 overflow-hidden">
+<div class="flex h-full w-full">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="fixed left-0 top-0 h-full w-60 bg-slate-800 border-r border-slate-700 z-40 flex flex-col">
+    <div class="p-4 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
+      <h1 class="text-base font-bold text-amber-400">&#128296; Servis Ariza Rehberi</h1>
+      <button id="close-sidebar" class="p-1.5 hover:bg-slate-700 rounded-lg transition-colors lg:hidden text-slate-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
-    <nav id="error-menu" class="p-3 space-y-2"><!-- Mekanik Hatalar -->
-     <div class="category-group"><button class="category-header w-full flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors" data-category="mechanical"> <span class="flex items-center gap-2"> <span class="text-xl">⚙️</span> <span class="font-semibold">Mekanik Hatalar</span> </span>
-       <svg class="w-4 h-4 transition-transform category-arrow" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-       </svg></button>
-      <div class="category-content mt-1 space-y-1 pl-2" data-category-content="mechanical"><button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="M001"> <span class="text-amber-400 font-mono">M001</span> - Motor Aşırı Isınma </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="M002"> <span class="text-amber-400 font-mono">M002</span> - Rulman Arızası </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="M003"> <span class="text-amber-400 font-mono">M003</span> - Kayış Kopması </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="M004"> <span class="text-amber-400 font-mono">M004</span> - Titreşim Hatası </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="M005"> <span class="text-amber-400 font-mono">M005</span> - Yağlama Yetersiz </button>
-      </div>
-     </div><!-- Elektriksel Hatalar -->
-     <div class="category-group"><button class="category-header w-full flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors" data-category="electrical"> <span class="flex items-center gap-2"> <span class="text-xl">⚡</span> <span class="font-semibold">Elektriksel Hatalar</span> </span>
-       <svg class="w-4 h-4 transition-transform category-arrow" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-       </svg></button>
-      <div class="category-content mt-1 space-y-1 pl-2" data-category-content="electrical"><button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="E001"> <span class="text-amber-400 font-mono">E001</span> - Kısa Devre </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="E002"> <span class="text-amber-400 font-mono">E002</span> - Aşırı Akım </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="E003"> <span class="text-amber-400 font-mono">E003</span> - Gerilim Düşüklüğü </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="E004"> <span class="text-amber-400 font-mono">E004</span> - Topraklama Hatası </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="E005"> <span class="text-amber-400 font-mono">E005</span> - Faz Kaybı </button>
-      </div>
-     </div><!-- Sensör Hataları -->
-     <div class="category-group"><button class="category-header w-full flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors" data-category="sensor"> <span class="flex items-center gap-2"> <span class="text-xl">📡</span> <span class="font-semibold">Sensör Hataları</span> </span>
-       <svg class="w-4 h-4 transition-transform category-arrow" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-       </svg></button>
-      <div class="category-content mt-1 space-y-1 pl-2" data-category-content="sensor"><button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="S001"> <span class="text-amber-400 font-mono">S001</span> - Sıcaklık Sensörü </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="S002"> <span class="text-amber-400 font-mono">S002</span> - Basınç Sensörü </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="S003"> <span class="text-amber-400 font-mono">S003</span> - Hız Sensörü </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="S004"> <span class="text-amber-400 font-mono">S004</span> - Seviye Sensörü </button>
-      </div>
-     </div><!-- İletişim Hataları -->
-     <div class="category-group"><button class="category-header w-full flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors" data-category="communication"> <span class="flex items-center gap-2"> <span class="text-xl">🔗</span> <span class="font-semibold">İletişim Hataları</span> </span>
-       <svg class="w-4 h-4 transition-transform category-arrow" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-       </svg></button>
-      <div class="category-content mt-1 space-y-1 pl-2" data-category-content="communication"><button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="C001"> <span class="text-amber-400 font-mono">C001</span> - Bağlantı Kopması </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="C002"> <span class="text-amber-400 font-mono">C002</span> - Veri Hatası </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="C003"> <span class="text-amber-400 font-mono">C003</span> - Zaman Aşımı </button>
-      </div>
-     </div><!-- Hidrolik Hatalar -->
-     <div class="category-group"><button class="category-header w-full flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors" data-category="hydraulic"> <span class="flex items-center gap-2"> <span class="text-xl">💧</span> <span class="font-semibold">Hidrolik Hatalar</span> </span>
-       <svg class="w-4 h-4 transition-transform category-arrow" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-       </svg></button>
-      <div class="category-content mt-1 space-y-1 pl-2" data-category-content="hydraulic"><button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="H001"> <span class="text-amber-400 font-mono">H001</span> - Düşük Basınç </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="H002"> <span class="text-amber-400 font-mono">H002</span> - Yağ Sızıntısı </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="H003"> <span class="text-amber-400 font-mono">H003</span> - Filtre Tıkanması </button> <button class="error-item w-full text-left p-2 pl-4 hover:bg-amber-500/20 rounded-lg transition-all text-sm" data-error="H004"> <span class="text-amber-400 font-mono">H004</span> - Pompa Arızası </button>
-      </div>
-     </div>
+    <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest px-2 mb-2">Makineler</p>
+      <div id="machine-list"></div>
     </nav>
-   </aside><!-- Main Content -->
-   <main id="main-content" class="content-transition flex-1 ml-72 h-full overflow-y-auto"><!-- Mobile Header -->
-    <header class="lg:hidden sticky top-0 bg-slate-800 border-b border-slate-700 p-4 flex items-center gap-3 z-30"><button id="open-sidebar" class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg></button>
-     <h1 class="text-lg font-bold text-amber-400">🔧 Servis Rehberi</h1>
-    </header><!-- Content Area -->
-    <div id="content-area" class="p-6 lg:p-8"><!-- Welcome Screen -->
-     <div id="welcome-screen" class="fade-in">
-      <div class="max-w-3xl mx-auto text-center py-16">
-       <div class="text-8xl mb-6">
-        🔧
-       </div>
-       <h1 id="welcome-title" class="text-4xl font-bold text-amber-400 mb-4">Servis Hata Kodları Rehberi</h1>
-       <p id="welcome-text" class="text-xl text-slate-400 mb-8">Soldaki menüden bir hata kodu seçerek detaylı bilgi alabilirsiniz.</p>
-       <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-12">
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-         <div class="text-3xl mb-2">
-          ⚙️
-         </div>
-         <div class="text-2xl font-bold text-amber-400">
-          5
-         </div>
-         <div class="text-sm text-slate-400">
-          Mekanik Hata
-         </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main id="main-content" class="ml-60 flex-1 h-full overflow-y-auto">
+
+    <!-- Mobil Header -->
+    <header class="lg:hidden sticky top-0 bg-slate-800 border-b border-slate-700 p-4 flex items-center gap-3 z-30">
+      <button id="open-sidebar" class="p-2 hover:bg-slate-700 rounded-lg transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+      <h1 class="text-lg font-bold text-amber-400">&#128296; Servis Ariza Rehberi</h1>
+    </header>
+
+    <div class="p-6 lg:p-8">
+
+      <!-- Karsılama -->
+      <div id="welcome-screen" class="fade-in">
+        <div class="max-w-2xl mx-auto text-center py-20">
+          <div class="text-7xl mb-6">&#128296;</div>
+          <h2 class="text-3xl font-bold text-amber-400 mb-3">Servis Ariza Rehberi</h2>
+          <p class="text-slate-400 text-lg mb-10">Sol menuden bir makine secerek o makineye ait arizalari inceleyebilirsiniz.</p>
+          <div id="welcome-machines" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"></div>
         </div>
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-         <div class="text-3xl mb-2">
-          ⚡
-         </div>
-         <div class="text-2xl font-bold text-amber-400">
-          5
-         </div>
-         <div class="text-sm text-slate-400">
-          Elektriksel Hata
-         </div>
-        </div>
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-         <div class="text-3xl mb-2">
-          📡
-         </div>
-         <div class="text-2xl font-bold text-amber-400">
-          4
-         </div>
-         <div class="text-sm text-slate-400">
-          Sensör Hatası
-         </div>
-        </div>
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-         <div class="text-3xl mb-2">
-          🔗
-         </div>
-         <div class="text-2xl font-bold text-amber-400">
-          3
-         </div>
-         <div class="text-sm text-slate-400">
-          İletişim Hatası
-         </div>
-        </div>
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-         <div class="text-3xl mb-2">
-          💧
-         </div>
-         <div class="text-2xl font-bold text-amber-400">
-          4
-         </div>
-         <div class="text-sm text-slate-400">
-          Hidrolik Hata
-         </div>
-        </div>
-        <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
-         <div class="text-3xl mb-2">
-          📋
-         </div>
-         <div class="text-2xl font-bold text-amber-400">
-          21
-         </div>
-         <div class="text-sm text-slate-400">
-          Toplam Hata Kodu
-         </div>
-        </div>
-       </div>
       </div>
-     </div><!-- Error Detail Screen -->
-     <div id="error-detail" class="fade-in hidden"><button id="back-btn" class="mb-6 flex items-center gap-2 text-slate-400 hover:text-amber-400 transition-colors">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-       </svg> Ana Sayfaya Dön </button>
-      <div class="max-w-4xl">
-       <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
-        <div id="error-header" class="p-6 border-b border-slate-700 bg-gradient-to-r from-amber-500/20 to-transparent">
-         <div class="flex items-center gap-4"><span id="error-icon" class="text-5xl">⚙️</span>
-          <div><span id="error-code" class="inline-block px-3 py-1 bg-amber-500 text-slate-900 rounded-full text-sm font-bold mb-2">M001</span>
-           <h2 id="error-title" class="text-2xl font-bold">Motor Aşırı Isınma</h2>
+
+      <!-- Makine Sayfasi -->
+      <div id="machine-screen" class="hidden fade-in">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center text-2xl">&#128296;</div>
+          <div>
+            <p class="text-xs text-slate-500 uppercase tracking-widest">Makine</p>
+            <h2 id="machine-title" class="text-2xl font-bold text-amber-400"></h2>
           </div>
-         </div>
         </div>
-        <div class="p-6">
-         <p id="error-description" class="text-slate-300 mb-6">Motor normalin üzerinde bir sıcaklığa ulaştığında bu hata kodu üretilir.</p>
-         <h3 class="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg> Olası Sebepler</h3>
-         <div id="causes-container" class="grid gap-3"><!-- Causes will be dynamically inserted here -->
-         </div>
+        <div id="fault-list" class="space-y-3 max-w-3xl"></div>
+        <div id="no-faults" class="hidden text-center py-16">
+          <div class="text-5xl mb-4">&#128295;</div>
+          <p class="text-slate-400 text-lg">Bu makine icin henuz ariza kaydi eklenmemis.</p>
         </div>
-       </div>
       </div>
-     </div>
+
     </div>
-   </main>
-  </div><!-- Mobile Overlay -->
-  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+  </main>
+</div>
 
-  <!-- Kategori Veri Dosyaları (her biri kendi JS dosyasında) -->
-  <script src="data/mechanical.js"></script>
-  <script src="data/electrical.js"></script>
-  <script src="data/sensor.js"></script>
-  <script src="data/communication.js"></script>
-  <script src="data/hydraulic.js"></script>
+<!-- Mobil Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
 
-  <!-- Uygulama Mantığı -->
-  <script src="js/app.js"></script>
-
- </body>
+<script src="data/machines.js"></script>
+<script src="js/app.js"></script>
+</body>
 </html>

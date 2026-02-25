@@ -1,145 +1,190 @@
-// ============================================================
-//  UYGULAMA MANTIĞI  –  app.js
-//  Tüm kategori verilerini birleştirir ve arayüzü yönetir.
-//  Bağımlılıklar (sırayla yüklenmelidir):
-//    data/mechanical.js   → mechanicalErrors
-//    data/electrical.js   → electricalErrors
-//    data/sensor.js       → sensorErrors
-//    data/communication.js→ communicationErrors
-//    data/hydraulic.js    → hydraulicErrors
+﻿// ============================================================
+//  app.js    Makine bazli ariza rehberi
 // ============================================================
 
-// Tüm kategorileri tek bir nesnede birleştir
-const errorData = {
-  ...mechanicalErrors,
-  ...electricalErrors,
-  ...sensorErrors,
-  ...communicationErrors,
-  ...hydraulicErrors
-};
-
-// ── DOM Referansları ──────────────────────────────────────────
+//  DOM 
 const sidebar        = document.getElementById('sidebar');
 const mainContent    = document.getElementById('main-content');
 const openSidebarBtn = document.getElementById('open-sidebar');
 const closeSidebarBtn= document.getElementById('close-sidebar');
 const sidebarOverlay = document.getElementById('sidebar-overlay');
 const welcomeScreen  = document.getElementById('welcome-screen');
-const errorDetail    = document.getElementById('error-detail');
-const backBtn        = document.getElementById('back-btn');
+const machineScreen  = document.getElementById('machine-screen');
+const machineTitle   = document.getElementById('machine-title');
+const faultList      = document.getElementById('fault-list');
+const noFaults       = document.getElementById('no-faults');
+const machineListEl  = document.getElementById('machine-list');
+const welcomeMachines= document.getElementById('welcome-machines');
 
-// ── Kategori Aç/Kapat ─────────────────────────────────────────
-document.querySelectorAll('.category-header').forEach(header => {
-  header.addEventListener('click', () => {
-    const category = header.dataset.category;
-    const content  = document.querySelector(`[data-category-content="${category}"]`);
-    const arrow    = header.querySelector('.category-arrow');
-
-    content.classList.toggle('open');
-    arrow.style.transform = content.classList.contains('open')
-      ? 'rotate(180deg)'
-      : 'rotate(0deg)';
+//  Sidebar: Makine Listesini Olustur 
+Object.entries(machineData).forEach(([key, machine]) => {
+  const btn = document.createElement('button');
+  btn.className = 'machine-btn w-full text-left px-3 py-2.5 rounded-lg border border-transparent ' +
+    'text-slate-300 hover:text-amber-400 hover:bg-amber-500/10 transition-all text-sm font-medium ' +
+    'flex items-center gap-2.5';
+  btn.dataset.key = key;
+  btn.innerHTML = `<span class="text-base">${machine.icon}</span>${machine.label}`;
+  btn.addEventListener('click', () => {
+    showMachine(key);
+    if (window.innerWidth < 1024) closeSidebarFn();
   });
+  machineListEl.appendChild(btn);
 });
 
-// ── Hata Kalemi Tıklama ───────────────────────────────────────
-document.querySelectorAll('.error-item').forEach(item => {
-  item.addEventListener('click', () => {
-    showErrorDetail(item.dataset.error);
-    if (window.innerWidth < 1024) closeSidebar();
-  });
+//  Karsılama: Makine Kartları 
+Object.entries(machineData).forEach(([key, machine]) => {
+  const card = document.createElement('button');
+  card.className = 'bg-slate-800 rounded-xl p-5 border border-slate-700 ' +
+    'hover:border-amber-500/50 hover:bg-slate-700/60 transition-all flex flex-col items-center gap-2';
+  card.innerHTML = `
+    <span class="text-3xl">${machine.icon}</span>
+    <span class="font-bold text-amber-400 text-lg">${machine.label}</span>
+    <span class="text-xs text-slate-500">${machine.faults.length} ariza</span>`;
+  card.addEventListener('click', () => showMachine(key));
+  welcomeMachines.appendChild(card);
 });
 
-// ── Hata Detayını Göster ──────────────────────────────────────
-function showErrorDetail(code) {
-  const error = errorData[code];
-  if (!error) return;
+//  Makine Sayfasini Goster 
+function showMachine(key) {
+  const machine = machineData[key];
+  if (!machine) return;
 
-  document.getElementById('error-icon').textContent        = error.icon;
-  document.getElementById('error-code').textContent        = error.code;
-  document.getElementById('error-title').textContent       = error.title;
-  document.getElementById('error-description').textContent = error.description;
+  // Aktif butonu vurgula
+  document.querySelectorAll('.machine-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.key === key);
+  });
 
-  // Sebepler ve her sebebin altında çözüm önerileri
-  document.getElementById('causes-container').innerHTML =
-    error.causes.map((cause, i) => `
-      <div class="cause-card bg-slate-700/50 rounded-xl border border-slate-600 overflow-hidden"
-           style="animation-delay:${i * 0.1}s">
-        <div class="flex items-start gap-3 p-4">
-          <span class="flex-shrink-0 w-8 h-8 bg-amber-500/20 rounded-lg flex items-center
-                       justify-center text-amber-400 font-bold">${i + 1}</span>
-          <div class="flex-1">
-            <h4 class="font-semibold text-slate-100">${cause.title}</h4>
-            <p class="text-sm text-slate-400 mt-1">${cause.desc}</p>
-            ${cause.solutions && cause.solutions.length ? `
-            <div class="mt-3 space-y-2">
-              <p class="text-xs font-semibold text-green-400 uppercase tracking-wide flex items-center gap-1">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                Çözüm Önerileri
-              </p>
-              ${cause.solutions.map(sol => `
-                <div class="flex items-start gap-2 bg-green-500/10 rounded-lg px-3 py-2 border border-green-500/20">
-                  <span class="flex-shrink-0 w-5 h-5 bg-green-500 rounded-full flex items-center
-                               justify-center text-slate-900 text-xs font-bold mt-0.5">✓</span>
-                  <p class="text-sm text-slate-300">${sol}</p>
-                </div>`).join('')}
-            </div>` : ''}
-          </div>
-        </div>
-      </div>`
-    ).join('');
+  machineTitle.textContent = machine.label;
+  faultList.innerHTML = '';
+
+  if (!machine.faults || machine.faults.length === 0) {
+    noFaults.classList.remove('hidden');
+  } else {
+    noFaults.classList.add('hidden');
+    machine.faults.forEach((fault, fi) => {
+      faultList.appendChild(buildFaultCard(fault, fi));
+    });
+  }
 
   welcomeScreen.classList.add('hidden');
-  errorDetail.classList.remove('hidden');
-
-  // Aktif menü kalemi vurgula
-  document.querySelectorAll('.error-item').forEach(el => {
-    el.classList.toggle('bg-amber-500/20', el.dataset.error === code);
-  });
+  machineScreen.classList.remove('hidden');
+  machineScreen.classList.add('fade-in');
+  setTimeout(() => machineScreen.classList.remove('fade-in'), 300);
 }
 
-// ── Geri Butonu ───────────────────────────────────────────────
-backBtn.addEventListener('click', () => {
-  errorDetail.classList.add('hidden');
-  welcomeScreen.classList.remove('hidden');
-  document.querySelectorAll('.error-item').forEach(el => {
-    el.classList.remove('bg-amber-500/20');
-  });
-});
+//  Ariza Karti Olustur 
+function buildFaultCard(fault, fi) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'bg-slate-800 rounded-xl border border-slate-700 overflow-hidden';
 
-// ── Mobil Sidebar ─────────────────────────────────────────────
-function openSidebar() {
+  // Ariza baslik satirı
+  const header = document.createElement('div');
+  header.className = 'fault-header flex items-start gap-3 p-4 select-none';
+  header.innerHTML = `
+    <span class="flex-shrink-0 mt-0.5 w-7 h-7 bg-red-500/20 text-red-400 rounded-lg
+                 flex items-center justify-center font-bold text-sm">${fi + 1}</span>
+    <p class="flex-1 font-semibold text-slate-100 leading-snug">${fault.title}</p>
+    <svg class="fault-arrow w-5 h-5 text-slate-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>`;
+
+  // Sebep listesi (kapali)
+  const body = document.createElement('div');
+  body.className = 'fault-body';
+
+  if (fault.causes && fault.causes.length > 0) {
+    const inner = document.createElement('div');
+    inner.className = 'border-t border-slate-700 divide-y divide-slate-700/60';
+
+    fault.causes.forEach((cause, ci) => {
+      inner.appendChild(buildCauseRow(cause, ci));
+    });
+
+    body.appendChild(inner);
+  }
+
+  // Acma/kapama
+  const arrow = header.querySelector('.fault-arrow');
+  header.addEventListener('click', () => {
+    const isOpen = body.classList.toggle('open');
+    arrow.classList.toggle('open', isOpen);
+  });
+
+  wrapper.appendChild(header);
+  wrapper.appendChild(body);
+  return wrapper;
+}
+
+//  Sebep Satiri Olustur 
+function buildCauseRow(cause, ci) {
+  const row = document.createElement('div');
+  row.className = 'cause-row';
+
+  // Sebep baslik
+  const causeHeader = document.createElement('div');
+  causeHeader.className = 'flex items-start gap-3 px-4 py-3 select-none';
+  causeHeader.innerHTML = `
+    <span class="flex-shrink-0 mt-0.5 w-6 h-6 bg-amber-500/20 text-amber-400 rounded-md
+                 flex items-center justify-center text-xs font-bold">${ci + 1}</span>
+    <p class="flex-1 text-sm text-slate-300 leading-snug">${cause.title}</p>
+    <svg class="cause-arrow w-4 h-4 text-slate-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>`;
+
+  // Cozum paneli
+  const solutionPanel = document.createElement('div');
+  solutionPanel.className = 'cause-solution';
+
+  if (cause.solution) {
+    solutionPanel.innerHTML = `
+      <div class="mx-4 mb-3 p-4 bg-green-500/10 border border-green-500/25 rounded-xl">
+        <p class="text-xs font-semibold text-green-400 uppercase tracking-wide flex items-center gap-1.5 mb-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Cozum Onerisi
+        </p>
+        <p class="text-sm text-slate-300 leading-relaxed">${cause.solution}</p>
+      </div>`;
+  }
+
+  // Acma/kapama
+  const causeArrow = causeHeader.querySelector('.cause-arrow');
+  causeHeader.addEventListener('click', () => {
+    const isOpen = solutionPanel.classList.toggle('open');
+    causeArrow.classList.toggle('open', isOpen);
+  });
+
+  row.appendChild(causeHeader);
+  row.appendChild(solutionPanel);
+  return row;
+}
+
+//  Mobil Sidebar 
+function openSidebarFn() {
   sidebar.style.transform = 'translateX(0)';
   sidebarOverlay.classList.remove('hidden');
 }
-
-function closeSidebar() {
+function closeSidebarFn() {
   sidebar.style.transform = 'translateX(-100%)';
   sidebarOverlay.classList.add('hidden');
 }
 
-if (openSidebarBtn)  openSidebarBtn.addEventListener('click', openSidebar);
-if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
-if (sidebarOverlay)  sidebarOverlay.addEventListener('click', closeSidebar);
+if (openSidebarBtn)  openSidebarBtn.addEventListener('click', openSidebarFn);
+if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebarFn);
+if (sidebarOverlay)  sidebarOverlay.addEventListener('click', closeSidebarFn);
 
-// ── Duyarlı Yeniden Boyutlandırma ────────────────────────────
+//  Responsive 
 function handleResize() {
   if (window.innerWidth >= 1024) {
-    sidebar.style.transform     = 'translateX(0)';
-    mainContent.style.marginLeft = '18rem';
+    sidebar.style.transform = 'translateX(0)';
+    mainContent.style.marginLeft = '15rem'; // w-60
     sidebarOverlay.classList.add('hidden');
   } else {
-    sidebar.style.transform     = 'translateX(-100%)';
+    sidebar.style.transform = 'translateX(-100%)';
     mainContent.style.marginLeft = '0';
   }
 }
-
 window.addEventListener('resize', handleResize);
 handleResize();
-
-// ── Varsayılan Olarak Mekanik Kategorisini Aç ─────────────────
-document.querySelector('[data-category-content="mechanical"]').classList.add('open');
-document.querySelector('[data-category="mechanical"] .category-arrow').style.transform = 'rotate(180deg)';
