@@ -17,6 +17,8 @@
     .fade-in { animation: fadeIn 0.25s ease-out; }
     @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .machine-btn.active { background:rgba(251,191,36,0.18); border-color:rgba(251,191,36,0.55); color:#fbbf24; }
+    .breadcrumb-item { cursor:pointer; transition: color 0.15s; }
+    .breadcrumb-item:hover { color:#fbbf24; }
     .fault-header { cursor:pointer; transition: background 0.15s; }
     .fault-header:hover { background: rgba(255,255,255,0.04); }
     .cause-row { cursor:pointer; transition: background 0.15s; }
@@ -32,7 +34,7 @@
   <!-- SIDEBAR -->
   <aside id="sidebar" class="fixed left-0 top-0 h-full w-60 bg-slate-800 border-r border-slate-700 z-40 flex flex-col">
     <div class="p-4 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
-      <h1 class="text-base font-bold text-amber-400">&#128296; Servis Ariza Rehberi</h1>
+      <h1 id="sidebar-home-btn" class="text-base font-bold text-amber-400 cursor-pointer hover:text-amber-300 transition-colors">&#128296; Servis Ariza Rehberi</h1>
       <button id="close-sidebar" class="p-1.5 hover:bg-slate-700 rounded-lg transition-colors lg:hidden text-slate-400">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -57,6 +59,18 @@
       </button>
       <h1 class="text-lg font-bold text-amber-400">&#128296; Servis Ariza Rehberi</h1>
     </header>
+
+    <!-- Breadcrumb -->
+    <div id="breadcrumb-bar" class="hidden sticky top-0 bg-slate-800/90 backdrop-blur border-b border-slate-700 px-6 py-2.5 z-20">
+      <nav class="flex items-center gap-1.5 text-sm flex-wrap">
+        <button id="breadcrumb-home" class="breadcrumb-item flex items-center gap-1 text-slate-400 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Ana Sayfa
+        </button>
+        <span id="breadcrumb-sep" class="hidden text-slate-600">/</span>
+        <span id="breadcrumb-machine" class="hidden text-amber-400 font-semibold"></span>
+      </nav>
+    </div>
 
     <div class="p-6 lg:p-8">
 

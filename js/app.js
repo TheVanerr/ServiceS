@@ -3,18 +3,22 @@
 // ============================================================
 
 //  DOM 
-const sidebar        = document.getElementById('sidebar');
-const mainContent    = document.getElementById('main-content');
-const openSidebarBtn = document.getElementById('open-sidebar');
-const closeSidebarBtn= document.getElementById('close-sidebar');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-const welcomeScreen  = document.getElementById('welcome-screen');
-const machineScreen  = document.getElementById('machine-screen');
-const machineTitle   = document.getElementById('machine-title');
-const faultList      = document.getElementById('fault-list');
-const noFaults       = document.getElementById('no-faults');
-const machineListEl  = document.getElementById('machine-list');
-const welcomeMachines= document.getElementById('welcome-machines');
+const sidebar           = document.getElementById('sidebar');
+const mainContent       = document.getElementById('main-content');
+const openSidebarBtn    = document.getElementById('open-sidebar');
+const closeSidebarBtn   = document.getElementById('close-sidebar');
+const sidebarOverlay    = document.getElementById('sidebar-overlay');
+const welcomeScreen     = document.getElementById('welcome-screen');
+const machineScreen     = document.getElementById('machine-screen');
+const machineTitle      = document.getElementById('machine-title');
+const faultList         = document.getElementById('fault-list');
+const noFaults          = document.getElementById('no-faults');
+const machineListEl     = document.getElementById('machine-list');
+const welcomeMachines   = document.getElementById('welcome-machines');
+const breadcrumbBar     = document.getElementById('breadcrumb-bar');
+const breadcrumbHome    = document.getElementById('breadcrumb-home');
+const breadcrumbSep     = document.getElementById('breadcrumb-sep');
+const breadcrumbMachine = document.getElementById('breadcrumb-machine');
 
 //  Sidebar: Makine Listesini Olustur 
 Object.entries(machineData).forEach(([key, machine]) => {
@@ -44,6 +48,21 @@ Object.entries(machineData).forEach(([key, machine]) => {
   welcomeMachines.appendChild(card);
 });
 
+//  Ana Sayfaya Don 
+function showHome() {
+  document.querySelectorAll('.machine-btn').forEach(b => b.classList.remove('active'));
+  machineScreen.classList.add('hidden');
+  welcomeScreen.classList.remove('hidden');
+  welcomeScreen.classList.add('fade-in');
+  setTimeout(() => welcomeScreen.classList.remove('fade-in'), 300);
+  // Breadcrumb gizle
+  breadcrumbBar.classList.add('hidden');
+  breadcrumbSep.classList.add('hidden');
+  breadcrumbMachine.classList.add('hidden');
+  breadcrumbMachine.textContent = '';
+  mainContent.scrollTop = 0;
+}
+
 //  Makine Sayfasini Goster 
 function showMachine(key) {
   const machine = machineData[key];
@@ -70,6 +89,13 @@ function showMachine(key) {
   machineScreen.classList.remove('hidden');
   machineScreen.classList.add('fade-in');
   setTimeout(() => machineScreen.classList.remove('fade-in'), 300);
+
+  // Breadcrumb güncelle
+  breadcrumbBar.classList.remove('hidden');
+  breadcrumbSep.classList.remove('hidden');
+  breadcrumbMachine.classList.remove('hidden');
+  breadcrumbMachine.textContent = machine.label;
+  mainContent.scrollTop = 0;
 }
 
 //  Ariza Karti Olustur 
@@ -174,6 +200,9 @@ function closeSidebarFn() {
 if (openSidebarBtn)  openSidebarBtn.addEventListener('click', openSidebarFn);
 if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebarFn);
 if (sidebarOverlay)  sidebarOverlay.addEventListener('click', closeSidebarFn);
+if (breadcrumbHome)  breadcrumbHome.addEventListener('click', showHome);
+const sidebarHomeBtn = document.getElementById('sidebar-home-btn');
+if (sidebarHomeBtn)  sidebarHomeBtn.addEventListener('click', showHome);
 
 //  Responsive 
 function handleResize() {
